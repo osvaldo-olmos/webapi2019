@@ -105,5 +105,19 @@ namespace TodoApi.Controllers
 
             return NoContent();
         }
+        
+        [HttpGet("search")]
+        public ActionResult<List<TodoItem>> Get(string searchString)
+        {
+            List<TodoItem> result = null;
+            if(searchString ==null)
+            {
+                result =_context.TodoItems.ToList();
+            }else
+            {
+                result =_context.TodoItems.Where(x => x.Name.ToLowerInvariant().Contains(searchString.ToLowerInvariant())).ToList();
+            }
+            return result;
+        }
     }
 }

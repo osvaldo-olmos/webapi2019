@@ -12,13 +12,11 @@ namespace TodoApi.ActionFilters
             if(client == StringValues.Empty || client != "1")
             {
                 context.Result = new BadRequestObjectResult("Invalid Client");
-                return;
             }
         }
  
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            
         }
     }
 }

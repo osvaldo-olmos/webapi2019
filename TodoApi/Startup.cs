@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using TodoApi.Models;
 using Microsoft.OpenApi.Models;
 using AutoMapper;
+using TodoApi.ActionFilters;
 
 namespace TodoApi
 {
@@ -31,7 +32,12 @@ namespace TodoApi
         {
             services.AddDbContext<TodoContext>(opt =>
                 opt.UseInMemoryDatabase("TodoList"));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(
+                config =>
+                {
+                    config.Filters.Add(new ValidationFilterAttribute());
+                }
+            ).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -58,7 +64,7 @@ namespace TodoApi
             app.UseHttpsRedirection();
             app.UseMvc();
 
-                        // Enable middleware to serve generated Swagger as a JSON endpoint.
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),

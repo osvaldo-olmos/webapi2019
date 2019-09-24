@@ -1,8 +1,10 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TodoApi.Dto;
 using TodoApi.Models;
 
 namespace TodoApi.Controllers
@@ -12,10 +14,12 @@ namespace TodoApi.Controllers
     public class TodoController : ControllerBase
     {
         private readonly TodoContext _context;
+        private readonly IMapper _mapper;
 
-        public TodoController(TodoContext context)
+        public TodoController(TodoContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
 
             if (_context.TodoItems.Count() == 0)
             {
@@ -35,7 +39,7 @@ namespace TodoApi.Controllers
 
         // GET: api/Todo/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TodoItem>> GetTodoItem(long id)
+        public async Task<ActionResult<TodoItemDTO>> GetTodoItem(long id)
         {
             var todoItem = await _context.TodoItems.FindAsync(id);
 
@@ -44,7 +48,8 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            return todoItem;
+            TodoItemDTO dto =_mapper.Map<TodoItemDTO>(todoItem);
+            return dto;
         }
 
         // POST: api/Todo

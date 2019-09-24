@@ -39,7 +39,7 @@ namespace TodoApi.Controllers
 
         // GET: api/Todo/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TodoItemDTO>> GetTodoItem(long id)
+        public async Task<ActionResult<TodoItem>> GetTodoItem(long id)
         {
             var todoItem = await _context.TodoItems.FindAsync(id);
 
@@ -48,14 +48,14 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            TodoItemDTO dto =_mapper.Map<TodoItemDTO>(todoItem);
-            return dto;
+            return todoItem;
         }
 
         // POST: api/Todo
         [HttpPost]
-        public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem item)
+        public async Task<ActionResult<TodoItem>> PostTodoItem(NewTodoItemDTO itemDTO)
         {
+            var item =_mapper.Map<TodoItem>(itemDTO);
             _context.TodoItems.Add(item);
             await _context.SaveChangesAsync();
 

@@ -9,6 +9,5 @@ namespace TodoApi.Models
         public string Name { get; set; }
         [Required]
         public bool? IsComplete { get; set; }
-        public User Responsible { get; set; }
     }
 }

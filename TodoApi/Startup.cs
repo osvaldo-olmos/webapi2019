@@ -112,8 +112,8 @@ namespace TodoApi
                 c.RoutePrefix = string.Empty;
             });
 
-            // ===== Create tables ======
-            dbContext.Database.EnsureCreated();
+            // ===== Run Migrations (if any is pending) ======
+            dbContext.Database.Migrate();
         }
     }
 }

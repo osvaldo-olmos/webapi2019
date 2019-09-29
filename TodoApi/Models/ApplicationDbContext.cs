@@ -5,6 +5,8 @@ namespace TodoApi.Models
 {
     public class ApplicationDbContext : IdentityDbContext
     {
+        public DbSet<TodoItem> TodoItems { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(GetConnectionString());

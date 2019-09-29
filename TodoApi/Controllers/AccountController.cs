@@ -33,21 +33,22 @@ namespace TodoApi.Controllers
         }
         
         [HttpPost]
-        public async Task<object> Login([FromBody] LoginDTO model)
+        public async Task<ActionResult<string>> Login([FromBody] LoginDTO model)
         {
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
             
             if (result.Succeeded)
             {
                 var appUser = _userManager.Users.SingleOrDefault(r => r.Email == model.Email);
-                return await GenerateJwtToken(model.Email, appUser);
+                return GenerateJwtToken(model.Email, appUser);
+            }else
+            {
+                throw new ApplicationException("Invalid Login"); //TODO resolver con un retorno de error correcto
             }
-            
-            throw new ApplicationException("INVALID_LOGIN_ATTEMPT");
         }
        
         [HttpPost]
-        public async Task<object> Register([FromBody] RegisterDTO model)
+        public async Task<ActionResult<string>> Register([FromBody] RegisterDTO model)
         {
             var user = new IdentityUser
             {
@@ -59,13 +60,14 @@ namespace TodoApi.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, false);
-                return await GenerateJwtToken(model.Email, user);
+                return GenerateJwtToken(model.Email, user);
+            }else
+            {
+                throw new ApplicationException("UNKNOWN_ERROR"); //TODO resolver con un retorno de error correcto
             }
-            
-            throw new ApplicationException("UNKNOWN_ERROR");
         }
         
-        private async Task<object> GenerateJwtToken(string email, IdentityUser user)
+        private string GenerateJwtToken(string email, IdentityUser user)
         {
             var claims = new List<Claim>
             {

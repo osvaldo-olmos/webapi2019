@@ -14,7 +14,7 @@ using TodoApi.Dto;
 
 namespace TodoApi.Controllers
 {
-[Route("[controller]/[action]")]
+    [Route("api/[controller]/[action]")]
     public class AccountController : Controller
     {
         private readonly SignInManager<IdentityUser> _signInManager;

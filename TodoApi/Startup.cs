@@ -35,11 +35,16 @@ namespace TodoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // services.AddDbContext<TodoContext>(opt =>
-            //     opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDbContext>(opt =>
+                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             
             // ===== Add our DbContext ========
-            services.AddDbContext<ApplicationDbContext>();
+            //services.AddDbContext<ApplicationDbContext>();
+
+            //===== Add Identity ========
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
 
             // ===== Add Jwt Authentication ========
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
@@ -71,9 +76,6 @@ namespace TodoApi
                     config.Filters.Add(new ValidationFilterAttribute());
                 }
             ).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-            // === Add Identity ===
-            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>

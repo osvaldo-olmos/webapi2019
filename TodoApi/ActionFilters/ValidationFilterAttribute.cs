@@ -9,10 +9,10 @@ namespace TodoApi.ActionFilters
         public void OnActionExecuting(ActionExecutingContext context)
         {
             var client = context.HttpContext.Request.Headers["client"];
-            // if(client == StringValues.Empty || client != "1")
-            // {
-            //     context.Result = new BadRequestObjectResult("Invalid Client");
-            // }
+            if(client == StringValues.Empty || client != "1")
+            {
+                context.Result = new BadRequestObjectResult("Invalid Client");
+            }
         }
  
         public void OnActionExecuted(ActionExecutedContext context)

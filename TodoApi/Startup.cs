@@ -15,6 +15,11 @@ using TodoApi.Models;
 using Microsoft.OpenApi.Models;
 using AutoMapper;
 using TodoApi.ActionFilters;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
 
 namespace TodoApi
 {
@@ -30,14 +35,45 @@ namespace TodoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<TodoContext>(opt =>
-                opt.UseInMemoryDatabase("TodoList"));
+            // services.AddDbContext<TodoContext>(opt =>
+            //     opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            
+            // ===== Add our DbContext ========
+            services.AddDbContext<ApplicationDbContext>();
+
+            // ===== Add Jwt Authentication ========
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
+            services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+                })
+                .AddJwtBearer(cfg =>
+                {
+                    cfg.RequireHttpsMetadata = false;
+                    cfg.SaveToken = true;
+                    cfg.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = Configuration["JwtIssuer"],
+                        ValidAudience = Configuration["JwtIssuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtKey"])),
+                        ClockSkew = TimeSpan.Zero // remove delay of token when expire
+                    };
+                });
+            
+            // Add MVC
             services.AddMvc(
                 config =>
                 {
                     config.Filters.Add(new ValidationFilterAttribute());
                 }
             ).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            // === Add Identity ===
+            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -60,6 +96,9 @@ namespace TodoApi
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            
+            // ===== Use Authentication ======
+            app.UseAuthentication();
 
             app.UseHttpsRedirection();
             app.UseMvc();

@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -17,18 +18,22 @@ namespace TodoApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public TodoController(ApplicationDbContext context, IMapper mapper)
+        public TodoController(ApplicationDbContext context, IMapper mapper,
+                        UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         // GET: api/Todo
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
         {
-            return await _context.TodoItems.ToListAsync();
+            var todoItems =await _context.TodoItems.Include(x => x.Responsible).ToListAsync();
+            return todoItems;
         }
 
         // GET: api/Todo/5
@@ -72,7 +77,7 @@ namespace TodoApi.Controllers
         }
         // PATCH: api/Todo/5
         [HttpPatch("{id}")]
-        public async Task<IActionResult> PatchTodoItem(long id, TodoItem item)
+        public async Task<IActionResult> PatchTodoItem(long id, UpdateTodoItemDTO changes)
         {
             var todoItem = await _context.TodoItems.FindAsync(id);
 
@@ -80,9 +85,21 @@ namespace TodoApi.Controllers
             {
                 return NotFound();
             }
+            switch (changes.Field)
+            {
+                case "Name":
+                    todoItem.Name =changes.Value;
+                    break;
 
-            todoItem.Name =item.Name;
-            todoItem.IsComplete=item.IsComplete;
+                case "IsCompleted":
+                    todoItem.IsComplete = bool.Parse(changes.Value);
+                    break;
+
+                case "Responsible":
+                    var user = await _userManager.Users.Where( u => u.Id == changes.Value).FirstOrDefaultAsync();
+                    todoItem.Responsible =user;
+                    break;
+            }
             await _context.SaveChangesAsync();
 
             return NoContent();

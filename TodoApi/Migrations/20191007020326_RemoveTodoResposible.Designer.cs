@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TodoApi.Models;
 
 namespace TodoApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191007020326_RemoveTodoResposible")]
+    partial class RemoveTodoResposible
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -192,11 +194,7 @@ namespace TodoApi.Migrations
                     b.Property<string>("Name")
                         .IsRequired();
 
-                    b.Property<string>("ResponsibleId");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ResponsibleId");
 
                     b.ToTable("TodoItems");
                 });
@@ -244,13 +242,6 @@ namespace TodoApi.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("TodoApi.Models.TodoItem", b =>
-                {
-                    b.HasOne("TodoApi.Models.ApplicationUser", "Responsible")
-                        .WithMany("TodoItems")
-                        .HasForeignKey("ResponsibleId");
                 });
 #pragma warning restore 612, 618
         }

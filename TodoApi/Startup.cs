@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using TodoApi.Repositories;
 
 namespace TodoApi
 {
@@ -38,8 +39,7 @@ namespace TodoApi
             services.AddDbContext<ApplicationDbContext>(opt =>
                  opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             
-            // ===== Add our DbContext ========
-            //services.AddDbContext<ApplicationDbContext>();
+            services.AddScoped<ITodoRepository, TodoRepository>();
 
             //===== Add Identity ========
             services.AddIdentity<ApplicationUser, IdentityRole>()

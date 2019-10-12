@@ -14,9 +14,6 @@ namespace TodoApi.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // modelBuilder.Entity<TodoItem>()
-            //      .HasOne(t => t.Responsible).WithMany(u => u.TodoItems);
-        
             base.OnModelCreating(modelBuilder);
         }
         

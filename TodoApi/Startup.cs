@@ -42,7 +42,7 @@ namespace TodoApi
             //services.AddDbContext<ApplicationDbContext>();
 
             //===== Add Identity ========
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 

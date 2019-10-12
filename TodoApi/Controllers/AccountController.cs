@@ -11,19 +11,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using TodoApi.Dto;
+using TodoApi.Models;
 
 namespace TodoApi.Controllers
 {
     [Route("api/[controller]/[action]")]
     public class AccountController : Controller
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
 
         public AccountController(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             IConfiguration configuration
             )
         {
@@ -31,7 +32,9 @@ namespace TodoApi.Controllers
             _signInManager = signInManager;
             _configuration =     configuration;
         }
-        
+
+        public UserManager<ApplicationUser> UserManager => _userManager;
+
         [HttpPost]
         public async Task<ActionResult<string>> Login([FromBody] LoginDTO model)
         {
@@ -50,7 +53,7 @@ namespace TodoApi.Controllers
         [HttpPost]
         public async Task<ActionResult<string>> Register([FromBody] RegisterDTO model)
         {
-            var user = new IdentityUser
+            var user = new ApplicationUser
             {
                 UserName = model.Email, 
                 Email = model.Email
@@ -67,7 +70,7 @@ namespace TodoApi.Controllers
             }
         }
         
-        private string GenerateJwtToken(string email, IdentityUser user)
+        private string GenerateJwtToken(string email, ApplicationUser user)
         {
             var claims = new List<Claim>
             {

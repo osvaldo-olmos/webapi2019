@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using TodoApi.Repositories;
 
 namespace TodoApi
 {
@@ -38,8 +39,7 @@ namespace TodoApi
             services.AddDbContext<ApplicationDbContext>(opt =>
                  opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             
-            // ===== Add our DbContext ========
-            //services.AddDbContext<ApplicationDbContext>();
+            services.AddScoped<ITodoRepository, TodoRepository>();
 
             //===== Add Identity ========
             services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -103,6 +103,9 @@ namespace TodoApi
             app.UseAuthentication();
 
             app.UseHttpsRedirection();
+
+            // Handles exceptions and generates a custom response body
+            app.UseExceptionHandler("/errors/500");
             app.UseMvc();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.

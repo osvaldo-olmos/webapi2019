@@ -103,6 +103,9 @@ namespace TodoApi
             app.UseAuthentication();
 
             app.UseHttpsRedirection();
+
+            // Handles exceptions and generates a custom response body
+            app.UseExceptionHandler("/errors/500");
             app.UseMvc();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.

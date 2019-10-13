@@ -17,13 +17,5 @@ namespace TodoApi.Controllers
 
             return Ok(error);
         }
-
-        // // GET: api/Todo
-        // [HttpGet]
-        // public async Task<IActionResult> GetTodoItems()
-        // {
-        //     var todoItems = await _todoRepository.GetAllAsync();
-        //     return Ok(todoItems);
-        // }
     }
 }

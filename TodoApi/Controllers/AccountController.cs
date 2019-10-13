@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using TodoApi.Dto;
+using TodoApi.Errors;
 using TodoApi.Models;
 
 namespace TodoApi.Controllers
@@ -46,7 +47,7 @@ namespace TodoApi.Controllers
                 return GenerateJwtToken(model.Email, appUser);
             }else
             {
-                throw new ApplicationException("Invalid Login"); //TODO resolver con un retorno de error correcto
+                return Ok(new ErrorMessage("invalid credentials"));
             }
         }
        
@@ -66,7 +67,7 @@ namespace TodoApi.Controllers
                 return GenerateJwtToken(model.Email, user);
             }else
             {
-                throw new ApplicationException("UNKNOWN_ERROR"); //TODO resolver con un retorno de error correcto
+                throw new ApplicationException($"UNKNOWN_ERROR: {result.Errors.ToString()}");
             }
         }
         

@@ -101,7 +101,6 @@ namespace TodoApi.Controllers
                     }else
                     {
                         return BadRequest(new ErrorMessage("User not found"));
-                        //throw new System.Exception("Se pudrio todo");
                     }
                     
                     break;                
@@ -111,7 +110,6 @@ namespace TodoApi.Controllers
                     return BadRequest(new ErrorMessage("Invalid field"));
             }
             await _todoRepository.UpdateAsync(todoItem);
-
             return NoContent();
         }
 

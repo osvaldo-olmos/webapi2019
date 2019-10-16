@@ -36,12 +36,10 @@ namespace TodoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(opt =>
-                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
-            
-            services.AddScoped<ITodoRepository, TodoRepository>();
+            // ===== Add our DbContext ========
+            services.AddDbContext<ApplicationDbContext>();
 
-            //===== Add Identity ========
+            // ===== Add Identity ========
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -68,8 +66,8 @@ namespace TodoApi
                         ClockSkew = TimeSpan.Zero // remove delay of token when expire
                     };
                 });
-            
-            // Add MVC
+
+            // ===== Add MVC ========
             services.AddMvc(
                 config =>
                 {
@@ -83,11 +81,13 @@ namespace TodoApi
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
             });
 
-            services.AddAutoMapper(typeof(Startup)); // Adding automapper
+            // Adding automapper
+            services.AddAutoMapper(typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env,
+                            ApplicationDbContext dbContext)
         {
             if (env.IsDevelopment())
             {
@@ -98,7 +98,6 @@ namespace TodoApi
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            
             // ===== Use Authentication ======
             app.UseAuthentication();
 
@@ -118,6 +117,9 @@ namespace TodoApi
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
                 c.RoutePrefix = string.Empty;
             });
+
+            // ===== Run Migrations (if any is pending) ======
+            dbContext.Database.Migrate();
         }
     }
 }

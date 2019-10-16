@@ -34,8 +34,6 @@ namespace TodoApi.Controllers
             _configuration =     configuration;
         }
 
-        public UserManager<ApplicationUser> UserManager => _userManager;
-
         [HttpPost]
         public async Task<ActionResult<string>> Login([FromBody] LoginDTO model)
         {

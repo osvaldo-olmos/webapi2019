@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TodoApi.Dto;
+using TodoApi.Errors;
 using TodoApi.Models;
+using TodoApi.Repositories;
 
 namespace TodoApi.Controllers
 {
@@ -16,38 +18,38 @@ namespace TodoApi.Controllers
     [ApiController]
     public class TodoController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ITodoRepository _todoRepository;
 
-        public TodoController(ApplicationDbContext context, IMapper mapper,
-                        UserManager<ApplicationUser> userManager)
+        public TodoController(IMapper mapper,
+                        UserManager<ApplicationUser> userManager, ITodoRepository todoRepository)
         {
-            _context = context;
             _mapper = mapper;
             _userManager = userManager;
+            _todoRepository =todoRepository;
         }
 
         // GET: api/Todo
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
+        public async Task<IActionResult> GetTodoItems()
         {
-            var todoItems =await _context.TodoItems.Include(x => x.Responsible).ToListAsync();
-            return todoItems;
+            var todoItems =await _todoRepository.GetAllAsync();
+            return Ok(todoItems);
         }
 
         // GET: api/Todo/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TodoItem>> GetTodoItem(long id)
+        public async Task<IActionResult> GetTodoItem(long id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var todoItem = await _todoRepository.GetAsync(id);
 
             if (todoItem == null)
             {
-                return NotFound();
+                return NotFound(new ErrorMessage("Invalid id"));
             }
 
-            return todoItem;
+            return Ok(todoItem);
         }
 
         // POST: api/Todo
@@ -55,8 +57,7 @@ namespace TodoApi.Controllers
         public async Task<ActionResult<TodoItem>> PostTodoItem(NewTodoItemDTO itemDTO)
         {
             var item =_mapper.Map<TodoItem>(itemDTO);
-            _context.TodoItems.Add(item);
-            await _context.SaveChangesAsync();
+            await _todoRepository.AddAsync(item);
 
             return CreatedAtAction(nameof(GetTodoItem), new { id = item.Id }, item);
         }
@@ -69,21 +70,18 @@ namespace TodoApi.Controllers
             {
                 return BadRequest();
             }
-
-            _context.Entry(item).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
+            await _todoRepository.UpdateAsync(item);
             return NoContent();
         }
         // PATCH: api/Todo/5
         [HttpPatch("{id}")]
         public async Task<IActionResult> PatchTodoItem(long id, UpdateTodoItemDTO changes)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var todoItem = await _todoRepository.GetAsync(id);
 
             if (todoItem == null)
             {
-                return NotFound();
+                return NotFound(new ErrorMessage("Invalid id"));
             }
             switch (changes.Field)
             {
@@ -97,11 +95,21 @@ namespace TodoApi.Controllers
 
                 case "Responsible":
                     var user = await _userManager.Users.Where( u => u.Id == changes.Value).FirstOrDefaultAsync();
-                    todoItem.Responsible =user;
-                    break;
+                    if(user !=null)
+                    {
+                        todoItem.Responsible =user;
+                    }else
+                    {
+                        return BadRequest(new ErrorMessage("User not found"));
+                    }
+                    
+                    break;                
+                case "Id":
+                    return Forbid();
+                default :
+                    return BadRequest(new ErrorMessage("Invalid field"));
             }
-            await _context.SaveChangesAsync();
-
+            await _todoRepository.UpdateAsync(todoItem);
             return NoContent();
         }
 
@@ -109,31 +117,30 @@ namespace TodoApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTodoItem(long id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var todoItem = await _todoRepository.GetAsync(id);
 
             if (todoItem == null)
             {
                 return NotFound();
             }
 
-            _context.TodoItems.Remove(todoItem);
-            await _context.SaveChangesAsync();
+            await _todoRepository.RemoveAsync(todoItem);
 
             return NoContent();
         }
         
         [HttpGet("search")]
-        public ActionResult<List<TodoItem>> Get(string searchString)
+        public async Task<IActionResult> GetAsync(string searchString)
         {
             List<TodoItem> result = null;
             if(searchString ==null)
             {
-                result =_context.TodoItems.ToList();
+                result = await _todoRepository.GetAllAsync();
             }else
             {
-                result =_context.TodoItems.Where(x => x.Name.ToLowerInvariant().Contains(searchString.ToLowerInvariant())).ToList();
+                result = await _todoRepository.SearchByNameAsync(searchString);
             }
-            return result;
+            return Ok(result);
         }
     }
 }

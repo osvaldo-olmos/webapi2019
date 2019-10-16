@@ -15,11 +15,12 @@ using TodoApi.Models;
 using Microsoft.OpenApi.Models;
 using AutoMapper;
 using TodoApi.ActionFilters;
-using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
+using TodoApi.Repositories;
 
 namespace TodoApi
 {
@@ -99,8 +100,11 @@ namespace TodoApi
             }
             // ===== Use Authentication ======
             app.UseAuthentication();
-            
+
             app.UseHttpsRedirection();
+
+            // Handles exceptions and generates a custom response body
+            app.UseExceptionHandler("/errors/500");
             app.UseMvc();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.

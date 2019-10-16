@@ -39,6 +39,8 @@ namespace TodoApi
             // ===== Add our DbContext ========
             services.AddDbContext<ApplicationDbContext>();
 
+            services.AddScoped<ITodoRepository, TodoRepository>();
+
             // ===== Add Identity ========
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()

@@ -37,12 +37,15 @@ namespace TodoApi
         public void ConfigureServices(IServiceCollection services)
         {
             // ===== Add our DbContext ========
-            services.AddDbContext<ApplicationDbContext>();
+                        services.AddDbContext<ApplicationDbContext>(opt =>
+                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
             // ===== Add Identity ========
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            services.AddScoped<ITodoRepository, TodoRepository>();
 
             // ===== Add Jwt Authentication ========
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims

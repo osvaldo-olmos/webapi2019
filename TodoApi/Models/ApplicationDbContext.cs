@@ -1,35 +1,23 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace TodoApi.Models
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext
     {
-        public DbSet<TodoItem> TodoItems { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
         {
-            optionsBuilder.UseSqlServer(GetConnectionString());
+        }
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            // Customize the ASP.NET Identity model and override the defaults if needed.
+            // For example, you can rename the ASP.NET Identity table names and more.
+            // Add your customizations after calling base.OnModelCreating(builder);
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-        }
-        
-        private static string GetConnectionString()
-        {
-            const string server = "tcp:ooo.database.windows.net,1433";
-            const string databaseName = "todo";
-            const string databaseUser = "osvaldo";
-            const string databasePass = "3nFAt1c0!";
-            
-            return $"Server={server};" +
-                   $"Initial Catalog={databaseName};" +
-                   $"Persist Security Info=False;" +
-                   $"User ID={databaseUser};" +
-                   $"Password={databasePass};" +
-                   $"MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-        }
+         public DbSet<TodoItem> TodoItems { get; set; }
     }
 }

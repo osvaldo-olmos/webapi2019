@@ -103,6 +103,13 @@ namespace TodoApi
             // ===== Use Authentication ======
             app.UseAuthentication();
 
+            // == CORS policies ==
+            app.UseCors(builder => {
+                builder.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+            });
+
             app.UseHttpsRedirection();
 
             // Handles exceptions and generates a custom response body

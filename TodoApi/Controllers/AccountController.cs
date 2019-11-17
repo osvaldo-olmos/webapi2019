@@ -17,7 +17,7 @@ using TodoApi.Models;
 namespace TodoApi.Controllers
 {
     [Route("api/[controller]/[action]")]
-    public class AccountController : Controller
+    public class AccountController : ControllerBase
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -50,7 +50,7 @@ namespace TodoApi.Controllers
         }
        
         [HttpPost]
-        public async Task<ActionResult<string>> Register([FromBody] RegisterDTO model)
+        public async Task<IActionResult> Register([FromBody] RegisterDTO model)
         {
             var user = new ApplicationUser
             {
@@ -62,10 +62,10 @@ namespace TodoApi.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, false);
-                return GenerateJwtToken(model.Email, user);
+                return Ok(GenerateJwtToken(model.Email, user));
             }else
             {
-                throw new ApplicationException($"UNKNOWN_ERROR: {result.Errors.ToString()}");
+                return BadRequest(new ErrorMessage(string.Join("|", result.Errors.Select(x => x.Description))));
             }
         }
         
